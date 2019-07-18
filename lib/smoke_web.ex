@@ -20,9 +20,10 @@ defmodule SmokeWeb do
   def controller do
     quote do
       use Phoenix.Controller, namespace: SmokeWeb
+
       import Plug.Conn
-      import SmokeWeb.Router.Helpers
       import SmokeWeb.Gettext
+      alias SmokeWeb.Router.Helpers, as: Routes
     end
   end
 
@@ -33,14 +34,14 @@ defmodule SmokeWeb do
         namespace: SmokeWeb
 
       # Import convenience functions from controllers
-      import Phoenix.Controller, only: [get_flash: 2, view_module: 1]
+      import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
 
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import SmokeWeb.Router.Helpers
       import SmokeWeb.ErrorHelpers
       import SmokeWeb.Gettext
+      alias SmokeWeb.Router.Helpers, as: Routes
     end
   end
 

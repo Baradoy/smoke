@@ -2,14 +2,25 @@
 
 Smoke provides easy access [:telemetry](https://github.com/beam-telemetry/telemetry) metrics for your application.
 
+The metrics provided by Smoke attempt to be "Good enough, for now, I guess". 
+
+## How it works
+
+The :telemetry events for Smoke are stored in memory. To avoid running out of memory 
+
+
+## When Should I Use Smoke? 
+
 Smoke is useful in two cases: 
 
-- You are early days in your project and you would like at least a little visibility into your :telemetry events. 
+- You are early days in your project and you would like some limited visibility into your telemetry events without having to wrangle an external service. 
 - You have severe limitations on infrastructure and cannot ship your metrics to an external service. 
 
+## When Should I Not Use Smoke? 
+
+Don't use Smoke if you have the time and ability to send your events to an external service. 
+
 ## Installation
-
-
 
 Once this gets published to Hex, you will be able to install it with the following:
 

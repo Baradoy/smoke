@@ -36,16 +36,15 @@ defmodule Smoke.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:cowboy, "~> 1.0"},
       {:credo, "~> 1.0", only: [:dev, :test]},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
       {:excoveralls, ">= 0.0.0", only: [:dev, :test]},
       {:gettext, "~> 0.11"},
-      {:phoenix, ">= 1.4.0"},
-      {:phoenix_pubsub, "~> 1.0"},
-      {:phoenix_html, "~> 2.10"},
+      {:phoenix, ">= 1.4.9"},
+      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix_html, "~> 2.11"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
-      {:poison, "~> 3.1"},
+      {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 1.0"},
       {:statistics, "~> 0.5.0"},
       {:telemetry, "~> 0.4.0"}

@@ -8,13 +8,17 @@ use Mix.Config
 # Configures the endpoint
 config :smoke, SmokeWeb.Endpoint,
   url: [host: "localhost"],
-  # secret_key_base: "9n5leDT63ohlOyd/PJCBpV+nZlHWjDJpuLZUqHjoOTKJszHmVNn22QkB44aop9XH",
-  render_errors: [view: SmokeWeb.ErrorView, accepts: ~w(html json)]
+  secret_key_base: "9n5leDT63ohlOyd/PJCBpV+nZlHWjDJpuLZUqHjoOTKJszHmVNn22QkB44aop9XH",
+  render_errors: [view: SmokeWeb.ErrorView, accepts: ~w(html json)],
+  pubsub: [name: Smoke.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:user_id]
+
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
