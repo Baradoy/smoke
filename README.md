@@ -1,20 +1,22 @@
 # Smoke
 
-Smoke provides easy instrumentation to access [:telemetry](https://github.com/beam-telemetry/telemetry) metrics for your application. 
+Smoke provides easy access [:telemetry](https://github.com/beam-telemetry/telemetry) metrics for your application.
 
-Smoke is designed as a stepping stone towards properly instrumenting your application. 
+Smoke is useful in two cases: 
 
-Smoke give sufficient enough, I guess, metrics
-
+- You are early days in your project and you would like at least a little visibility into your :telemetry events. 
+- You have severe limitations on infrastructure and cannot ship your metrics to an external service. 
 
 ## Installation
+
+
 
 Once this gets published to Hex, you will be able to install it with the following:
 
 ```elixir
 def deps do
   [
-    {:smoke, "~> 0.1.0"}
+    {:smoke, github: "Baradoy/smoke"}
   ]
 end
 ```
@@ -33,6 +35,8 @@ config :smoke,
 
 ## Web interface
 
+### In a Phoenix Project
+
 If you already have Phoenix running, you can enable the web interface by adding the following to your projects router file: 
 
 ```elixir
@@ -50,6 +54,8 @@ end
 
 You can now find your metrics at `http://yourendpoint.com/smoke`
 
+### As a Phoenix Server
+
 If you do not have Phoenix running, you can configure `Smoke` to run its own Phoenix server
 
 ```elixir
@@ -61,4 +67,4 @@ config :smoke, SmokeWeb.Endpoint,
   render_errors: [view: SmokeWeb.ErrorView, accepts: ~w(html json)]
 ```
 
-
+You can now find your metrics at http://localhost:4000/
