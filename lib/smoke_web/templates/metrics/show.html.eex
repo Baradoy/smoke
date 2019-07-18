@@ -1,0 +1,6 @@
+<div class="jumbotron">
+  <h2>Metrics</h2>
+  
+  <h3><%= @event_name %></h3>
+  <h4><%= @metrics %></h4>
+</div>

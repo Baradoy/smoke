@@ -1,0 +1,12 @@
+<div class="jumbotron">
+  <h2>Metrics</h2>
+  
+  <h3>Tracked Events</h3>
+  <ul>
+    <%= for event_name <- @event_names do %>
+      <li>
+        <%= link(event_name, to: "/events/#{event_name}", class: "btn") %>
+      </li>
+    <% end %> 
+  </ul>
+</div>
