@@ -1,4 +1,7 @@
 defmodule Smoke.Application do
+  @moduledoc """
+  Handles starting supervisors and workers for the Smoke Application
+  """
   use Application
 
   def start(_type, _args) do

@@ -1,4 +1,9 @@
 defmodule Smoke.Server do
+  @moduledoc """
+  Handles storage of events.
+
+  Enforces the cap on the number of events of a particular type.
+  """
   use GenServer
 
   require Logger
@@ -6,6 +11,9 @@ defmodule Smoke.Server do
   alias Smoke.Instrumenter
 
   defmodule Config do
+    @moduledoc """
+    Configuration for maximum number of events to hold and the number of events to drop when the limit is reached.
+    """
     defstruct max_events: 1000, clawback: 100
   end
 
@@ -40,7 +48,13 @@ defmodule Smoke.Server do
     events =
       event_names
       |> Enum.map(&attach/1)
-      |> Enum.map(fn event_name -> {event_name, %{events: []}} end)
+      |> Enum.map(fn
+        {event_name, max_events, clawback} ->
+          {event_name, %{events: [], config: %Config{max_events: max_events, clawback: clawback}}}
+
+        event_name ->
+          {event_name, %{events: [], config: %Config{}}}
+      end)
       |> Enum.into(%{})
 
     {:ok, %{events: events, config: %Config{}}}
@@ -61,7 +75,7 @@ defmodule Smoke.Server do
   def handle_cast({event_name, date_time, measurements, metadata}, state) do
     new_state =
       update_in(state, events_path(event_name), fn events_list ->
-        add_event({date_time, measurements, metadata}, events_list, config(state))
+        add_event({date_time, measurements, metadata}, events_list, config(event_name, state))
       end)
 
     {:noreply, new_state}
@@ -83,8 +97,13 @@ defmodule Smoke.Server do
     [:events, event_name, :events]
   end
 
-  defp config(state) do
-    Map.get(state, :config, %Config{})
+  defp config(event_name, state) do
+    get_in(state, [:events, event_name, :config])
+  end
+
+  defp attach({event_name, _, _} = arg) do
+    attach(event_name)
+    arg
   end
 
   defp attach(event_name) do

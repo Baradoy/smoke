@@ -6,8 +6,7 @@ The metrics provided by Smoke attempt to be "Good enough, for now, I guess".
 
 ## How it works
 
-The :telemetry events for Smoke are stored in memory. To avoid running out of memory 
-
+The :telemetry events for Smoke are stored in memory. To avoid running out of memory Smoke caps the number of messages that it keeps (defaulting to 1000 per event type). 
 
 ## When Should I Use Smoke? 
 

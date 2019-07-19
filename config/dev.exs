@@ -22,7 +22,7 @@ config :smoke, SmokeWeb.Endpoint,
 
 # Smoke Instrumentation
 config :smoke,
-  instrument: [[:smoke, :example, :done], [:smoke, :example, :failed]],
+  instrument: [{[:smoke, :example, :done], 10, 1}, [:smoke, :example, :failed]],
   standalone_endpoint: true
 
 # ## SSL Support

@@ -1,4 +1,8 @@
 defmodule Smoke.Metrics do
+  @moduledoc """
+  Creates Metrics from a list of events.
+  """
+
   def filter(events, {tag, value}) do
     events
     |> Stream.filter(fn

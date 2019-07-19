@@ -1,9 +1,10 @@
 defmodule Smoke do
-  alias Smoke.Server
+  @moduledoc """
+  Future API pieces will go here.
 
-  def hello do
-    :world
-  end
+  For the moment, sample events go here.
+  """
+  alias Smoke.Server
 
   def list_event_names() do
     Server.list_event_names()
