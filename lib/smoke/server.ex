@@ -48,15 +48,13 @@ defmodule Smoke.Server do
     Enum.each(event_names, fn event_name -> attach(event_name, server_name) end)
 
     events =
-      event_names
-      |> Enum.map(fn
+      Enum.into(event_names, %{}, fn
         {event_name, max_events, clawback} ->
           {event_name, %{events: [], config: %Config{max_events: max_events, clawback: clawback}}}
 
         event_name ->
           {event_name, %{events: [], config: %Config{}}}
       end)
-      |> Enum.into(%{})
 
     {:ok, %{events: events}}
   end

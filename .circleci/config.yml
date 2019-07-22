@@ -27,7 +27,8 @@ jobs:
           keys:
             - v1-build-cache-{{ .Branch }}
             - v1-build-cache
-      - run: mix do deps.get, compile
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors
       - run: mix dialyzer --plt
       - save_cache:
           key: v1-mix-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
@@ -48,6 +49,7 @@ jobs:
           key: v1-plt-cache-{{ checksum "mix.lock" }}
           paths: "~/.mix"
 
+      - run: mix format --check-formatted
       - run: mix test
       - run: mix credo
       - run: mix dialyzer --halt-exit-status
