@@ -5,7 +5,13 @@ defmodule Smoke.Instrumenter do
 
   alias Smoke.Server
 
-  def handle_event([:smoke, :example, :done] = event, measurements, metadata, config) do
-    Server.add_event(event, measurements, metadata, config)
+  def handle_event(event, measurements, metadata, config) do
+    case Keyword.get(config || [], :smoke_server_pid) do
+      pid when is_pid(pid) ->
+        Server.add_event(event, measurements, metadata, config, pid)
+
+      _ ->
+        Server.add_event(event, measurements, metadata, config)
+    end
   end
 end

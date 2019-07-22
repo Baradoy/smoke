@@ -8,3 +8,7 @@ config :smoke, SmokeWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :smoke,
+  instrument: [{[:smoke, :example, :done], 10, 1}, [:smoke, :example, :failed]],
+  standalone_endpoint: true

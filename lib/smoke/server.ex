@@ -20,7 +20,7 @@ defmodule Smoke.Server do
   # API
 
   def start_link(event_names, name \\ __MODULE__) do
-    GenServer.start_link(__MODULE__, %{event_names: event_names}, name: name)
+    GenServer.start_link(__MODULE__, %{event_names: event_names, server_name: name}, name: name)
   end
 
   def get_events(event_name, pid \\ __MODULE__) do
@@ -32,22 +32,23 @@ defmodule Smoke.Server do
   end
 
   def add_event(
-        [:smoke, :example, :done] = event,
+        event,
         measurements,
         metadata,
         _config,
         pid \\ __MODULE__
       ) do
-    GenServer.cast(pid, {event, DateTime.utc_now(), measurements, metadata})
+    GenServer.cast(pid, {:add_event, event, DateTime.utc_now(), measurements, metadata})
   end
 
   # Callbacks
 
   @impl true
-  def init(%{event_names: event_names}) do
+  def init(%{event_names: event_names, server_name: server_name}) do
+    Enum.each(event_names, fn event_name -> attach(event_name, server_name) end)
+
     events =
       event_names
-      |> Enum.map(&attach/1)
       |> Enum.map(fn
         {event_name, max_events, clawback} ->
           {event_name, %{events: [], config: %Config{max_events: max_events, clawback: clawback}}}
@@ -57,7 +58,7 @@ defmodule Smoke.Server do
       end)
       |> Enum.into(%{})
 
-    {:ok, %{events: events, config: %Config{}}}
+    {:ok, %{events: events}}
   end
 
   @impl true
@@ -72,7 +73,7 @@ defmodule Smoke.Server do
   end
 
   @impl true
-  def handle_cast({event_name, date_time, measurements, metadata}, state) do
+  def handle_cast({:add_event, event_name, date_time, measurements, metadata}, state) do
     new_state =
       update_in(state, events_path(event_name), fn events_list ->
         add_event({date_time, measurements, metadata}, events_list, config(event_name, state))
@@ -101,20 +102,25 @@ defmodule Smoke.Server do
     get_in(state, [:events, event_name, :config])
   end
 
-  defp attach({event_name, _, _} = arg) do
-    attach(event_name)
-    arg
-  end
+  defp attach({event_name, _, _}, server_name), do: attach(event_name, server_name)
 
-  defp attach(event_name) do
+  defp attach(event_name, server_name) do
     :ok =
       :telemetry.attach(
-        "smoke-instrumenter-" <> Enum.join(event_name, "."),
+        handler_id(event_name, server_name),
         event_name,
         &Instrumenter.handle_event/4,
-        nil
+        smoke_server_pid: self()
       )
+  end
 
-    event_name
+  def detach({event_name, _, _}, server_name), do: detach(event_name, server_name)
+
+  def detach(event_name, server_name) do
+    :telemetry.detach(handler_id(event_name, server_name))
+  end
+
+  defp handler_id(event_name, server_name) do
+    "smoke-#{server_name}." <> Enum.join(event_name, ".")
   end
 end
