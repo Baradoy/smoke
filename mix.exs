@@ -12,7 +12,10 @@ defmodule Smoke.Mixfile do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: [plt_add_deps: :transitive, plt_file: {:no_warn, "priv/plts/dialyzer.plt"}],
+      dialyzer: [
+        plt_add_deps: :transitive,
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+      ],
       test_coverage: [tool: ExCoveralls]
     ]
   end
@@ -37,13 +40,13 @@ defmodule Smoke.Mixfile do
   defp deps do
     [
       {:credo, "~> 1.0", only: [:dev, :test]},
-      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test], runtime: false},
       {:excoveralls, ">= 0.0.0", only: [:dev, :test]},
       {:gettext, "~> 0.11"},
       {:phoenix, ">= 1.4.9"},
       {:phoenix_pubsub, "~> 1.1"},
       {:phoenix_html, "~> 2.11"},
-      {:phoenix_live_reload, "~> 1.0", only: :dev},
+      {:phoenix_live_reload, "~> 1.0", only: [:dev, :test]},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 1.0"},
       {:statistics, "~> 0.5.0"},

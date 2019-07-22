@@ -26,4 +26,8 @@ npm-debug.log
 # variables.
 /config/*.secret.exs
 
+# Elixir LS
 .elixir_ls/
+
+# Coveralls 
+cover/
