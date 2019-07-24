@@ -25,7 +25,7 @@ defmodule SmokeWeb.MetricsController do
   end
 
   def metrics(conn, %{"event_name" => event_name, "measurement" => measurement}) do
-    metrics = ["counter", "sum", "last_value", "statistics", "distribution"]
+    metrics = [:counter, :sum, :last_value, :statistics, :distribution]
 
     render(conn, "metrics.html",
       event_name: event_name,
