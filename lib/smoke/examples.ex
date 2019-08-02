@@ -1,4 +1,8 @@
 defmodule Smoke.Examples do
+  @moduledoc """
+    Examples to use to get up and running quickly with Smoke
+  """
+
   def fire_example do
     :telemetry.execute(
       [:smoke, :example, :done],
