@@ -10,7 +10,7 @@ defmodule SmokeWeb.MetricsController do
       Smoke.Server.list_event_names()
       |> Enum.map(&path_to_strings/1)
 
-    render(conn, "index.html", event_names: event_names)
+    render(conn, event_names: event_names)
   end
 
   def measurements(conn, %{"event_name" => event_name}) do
@@ -21,13 +21,13 @@ defmodule SmokeWeb.MetricsController do
       |> Metrics.measurements()
       |> Enum.map(&Atom.to_string/1)
 
-    render(conn, "measurements.html", event_name: event_name, measurements: measurements)
+    render(conn, event_name: event_name, measurements: measurements)
   end
 
   def metrics(conn, %{"event_name" => event_name, "measurement" => measurement}) do
     metrics = [:counter, :sum, :last_value, :statistics, :distribution]
 
-    render(conn, "metrics.html",
+    render(conn,
       event_name: event_name,
       measurement: measurement,
       metrics: metrics
@@ -43,7 +43,7 @@ defmodule SmokeWeb.MetricsController do
       |> Server.get_events()
       |> Metrics.counter(measurement)
 
-    render(conn, "counter.html",
+    render(conn,
       event_name: event_name,
       measurement: measurement,
       counter: counter
@@ -59,7 +59,7 @@ defmodule SmokeWeb.MetricsController do
       |> Server.get_events()
       |> Metrics.sum(measurement)
 
-    render(conn, "sum.html",
+    render(conn,
       event_name: event_name,
       measurement: measurement,
       sum: sum
@@ -75,7 +75,7 @@ defmodule SmokeWeb.MetricsController do
       |> Server.get_events()
       |> Metrics.last_value(measurement)
 
-    render(conn, "last_value.html",
+    render(conn,
       event_name: event_name,
       measurement: measurement,
       last_value: last_value
@@ -91,7 +91,7 @@ defmodule SmokeWeb.MetricsController do
       |> Server.get_events()
       |> Metrics.statistics(measurement)
 
-    render(conn, "statistics.html",
+    render(conn,
       event_name: event_name,
       measurement: measurement,
       statistics: statistics
@@ -107,7 +107,7 @@ defmodule SmokeWeb.MetricsController do
       |> Server.get_events()
       |> Metrics.distribution(measurement)
 
-    render(conn, "distribution.html",
+    render(conn,
       event_name: event_name,
       measurement: measurement,
       histogram: histogram

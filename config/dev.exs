@@ -22,7 +22,12 @@ config :smoke, SmokeWeb.Endpoint,
 
 # Smoke Instrumentation
 config :smoke,
-  instrument: [{[:smoke, :example, :done], 10, 1}, [:smoke, :example, :failed]],
+  instrument: [
+    [:shopify_api, :rest_request, :success],
+    [:shopify_api, :rest_request, :failure],
+    [:shopify_api, :throttling, :within_limit],
+    [:shopify_api, :throttling, :over_limit]
+  ],
   standalone_endpoint: true
 
 # ## SSL Support

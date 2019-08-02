@@ -14,6 +14,19 @@ defmodule Smoke.MetricsTest do
 
       assert events |> Metrics.filter({:tag, "in"}) |> measurement_value() == [1, 4]
     end
+
+    test "filters for list of matching tags" do
+      events = [
+        create_event(%{value: 1}, %{tag: "in", other: "in"}),
+        create_event(%{value: 2}, %{tag: "out", other: "in"}),
+        create_event(%{value: 3}, %{tag: "out", other: "out"}),
+        create_event(%{value: 4}, %{tag: "in", other: "out"})
+      ]
+
+      assert events
+             |> Metrics.filter([{:tag, "in"}, {:other, "in"}])
+             |> measurement_value() == [1]
+    end
   end
 
   describe "tags/1" do
@@ -118,6 +131,46 @@ defmodule Smoke.MetricsTest do
       ]
 
       assert events |> Metrics.distribution(:value) == %{3 => 2, 2 => 1, 1 => 1, nil => 1}
+    end
+  end
+
+  describe "truncate/2" do
+    test "month" do
+      date = DateTime.utc_now()
+
+      assert %DateTime{
+               day: 1,
+               hour: 0,
+               minute: 0,
+               second: 0
+             } = Metrics.truncate(date, :month)
+    end
+
+    test "day" do
+      date = DateTime.utc_now()
+
+      assert %DateTime{
+               hour: 0,
+               minute: 0,
+               second: 0
+             } = Metrics.truncate(date, :day)
+    end
+
+    test "hour" do
+      date = DateTime.utc_now()
+
+      assert %DateTime{
+               minute: 0,
+               second: 0
+             } = Metrics.truncate(date, :day)
+    end
+
+    test "minute" do
+      date = DateTime.utc_now()
+
+      assert %DateTime{
+               second: 0
+             } = Metrics.truncate(date, :day)
     end
   end
 

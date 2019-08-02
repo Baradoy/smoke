@@ -1,0 +1,15 @@
+{
+    "coverage_options": {
+        "treat_no_relevant_lines_as_covered": true,
+        "output_dir": "cover/",
+        "minimum_coverage": 51
+    },
+    "terminal_options": {
+        "file_column_width": 80
+    },
+    "skip_files": [
+        "lib/smoke/application.ex",
+        "lib/smoke/examples.ex",
+        "lib/smoke_web.ex"
+    ]
+}
