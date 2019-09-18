@@ -4,4 +4,6 @@
   <h3><%= @event_name %>.<%= @measurement %></h3>
   
   <h4><%= @counter %></h4>
+
+  <h4>Earliest Event: <%= @first_event_time %></h4>
 </div>

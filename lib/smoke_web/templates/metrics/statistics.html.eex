@@ -10,4 +10,5 @@
   <h4>mode: <%= @statistics.mode %></h4>
   <h4>p95: <%= @statistics.p95 %></h4>
   <h4>p99: <%= @statistics.p99 %></h4>    
+  <h4>Earliest Event: <%= @first_event_time %></h4>
 </div>

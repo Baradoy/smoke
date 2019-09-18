@@ -11,4 +11,5 @@
     <% end %> 
   </ul>
 
+  <h4>Earliest Event: <%= @first_event_time %></h4>
 </div>
