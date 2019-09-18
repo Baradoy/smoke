@@ -117,6 +117,10 @@ defmodule Smoke.Metrics do
     |> Statistics.hist()
   end
 
+  def first_event_time([{time, _measurement, _metadata} | _tail] = _events), do: time
+
+  def first_event_time([]), do: nil
+
   defp measurement_value(key, default \\ nil) do
     fn {_time, measurement, _metadata} ->
       Map.get(measurement, key, default)

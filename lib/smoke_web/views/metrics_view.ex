@@ -10,30 +10,18 @@ defmodule SmokeWeb.MetricsView do
   def render("metrics.json", %{event_name: event_name, measurement: measurement, metrics: metrics}),
       do: %{event_name: event_name, measurement: measurement, metrics: metrics}
 
-  def render("counter.json", %{event_name: event_name, measurement: measurement, counter: counter}),
-      do: %{event_name: event_name, measurement: measurement, counter: counter}
+  def render("counter.json", data),
+    do: Map.take(data, [:event_name, :measurement, :counter, :first_event_time])
 
-  def render("sum.json", %{event_name: event_name, measurement: measurement, sum: sum}),
-    do: %{event_name: event_name, measurement: measurement, sum: sum}
+  def render("sum.json", data),
+    do: Map.take(data, [:event_name, :measurement, :sum, :first_event_time])
 
-  def render("last_value.json", %{
-        event_name: event_name,
-        measurement: measurement,
-        last_value: last_value
-      }),
-      do: %{event_name: event_name, measurement: measurement, last_value: last_value}
+  def render("last_value.json", data),
+    do: Map.take(data, [:event_name, :measurement, :last_value, :first_event_time])
 
-  def render("statistics.json", %{
-        event_name: event_name,
-        measurement: measurement,
-        statistics: statistics
-      }),
-      do: %{event_name: event_name, measurement: measurement, statistics: statistics}
+  def render("statistics.json", data),
+    do: Map.take(data, [:event_name, :measurement, :statistics, :first_event_time])
 
-  def render("distribution.json", %{
-        event_name: event_name,
-        measurement: measurement,
-        histogram: histogram
-      }),
-      do: %{event_name: event_name, measurement: measurement, histogram: histogram}
+  def render("distribution.json", data),
+    do: Map.take(data, [:event_name, :measurement, :histogram, :first_event_time])
 end

@@ -85,8 +85,11 @@ defmodule SmokeWeb.MetricsControllerTest do
       assert %{
                "event_name" => "smoke.example.done",
                "counter" => _,
-               "measurement" => "latency"
+               "measurement" => "latency",
+               "first_event_time" => first_event_time
              } = json_response(conn, 200)
+
+      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
@@ -106,8 +109,11 @@ defmodule SmokeWeb.MetricsControllerTest do
       assert %{
                "event_name" => "smoke.example.done",
                "sum" => _,
-               "measurement" => "latency"
+               "measurement" => "latency",
+               "first_event_time" => first_event_time
              } = json_response(conn, 200)
+
+      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
@@ -127,8 +133,11 @@ defmodule SmokeWeb.MetricsControllerTest do
       assert %{
                "event_name" => "smoke.example.done",
                "last_value" => _,
-               "measurement" => "latency"
+               "measurement" => "latency",
+               "first_event_time" => first_event_time
              } = json_response(conn, 200)
+
+      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
@@ -157,8 +166,11 @@ defmodule SmokeWeb.MetricsControllerTest do
                  "p99" => _,
                  "variance" => _
                },
-               "measurement" => "latency"
+               "measurement" => "latency",
+               "first_event_time" => first_event_time
              } = json_response(conn, 200)
+
+      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
@@ -178,8 +190,11 @@ defmodule SmokeWeb.MetricsControllerTest do
       assert %{
                "event_name" => "smoke.example.done",
                "histogram" => %{"292" => _},
-               "measurement" => "latency"
+               "measurement" => "latency",
+               "first_event_time" => first_event_time
              } = json_response(conn, 200)
+
+      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 

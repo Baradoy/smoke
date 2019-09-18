@@ -37,80 +37,90 @@ defmodule SmokeWeb.MetricsController do
   def counter(conn, %{"event_name" => event_name, "measurement" => measurement}) do
     measurement = String.to_atom(measurement)
 
-    counter =
+    events =
       event_name
       |> string_to_path()
       |> Server.get_events()
-      |> Metrics.counter(measurement)
+
+    counter = Metrics.counter(events, measurement)
 
     render(conn,
       event_name: event_name,
       measurement: measurement,
-      counter: counter
+      counter: counter,
+      first_event_time: Metrics.first_event_time(events)
     )
   end
 
   def sum(conn, %{"event_name" => event_name, "measurement" => measurement}) do
     measurement = String.to_atom(measurement)
 
-    sum =
+    events =
       event_name
       |> string_to_path()
       |> Server.get_events()
-      |> Metrics.sum(measurement)
+
+    sum = Metrics.sum(events, measurement)
 
     render(conn,
       event_name: event_name,
       measurement: measurement,
-      sum: sum
+      sum: sum,
+      first_event_time: Metrics.first_event_time(events)
     )
   end
 
   def last_value(conn, %{"event_name" => event_name, "measurement" => measurement}) do
     measurement = String.to_atom(measurement)
 
-    last_value =
+    events =
       event_name
       |> string_to_path()
       |> Server.get_events()
-      |> Metrics.last_value(measurement)
+
+    last_value = Metrics.last_value(events, measurement)
 
     render(conn,
       event_name: event_name,
       measurement: measurement,
-      last_value: last_value
+      last_value: last_value,
+      first_event_time: Metrics.first_event_time(events)
     )
   end
 
   def statistics(conn, %{"event_name" => event_name, "measurement" => measurement}) do
     measurement = String.to_atom(measurement)
 
-    statistics =
+    events =
       event_name
       |> string_to_path()
       |> Server.get_events()
-      |> Metrics.statistics(measurement)
+
+    statistics = Metrics.statistics(events, measurement)
 
     render(conn,
       event_name: event_name,
       measurement: measurement,
-      statistics: statistics
+      statistics: statistics,
+      first_event_time: Metrics.first_event_time(events)
     )
   end
 
   def distribution(conn, %{"event_name" => event_name, "measurement" => measurement}) do
     measurement = String.to_atom(measurement)
 
-    histogram =
+    events =
       event_name
       |> string_to_path()
       |> Server.get_events()
-      |> Metrics.distribution(measurement)
+
+    histogram = Metrics.distribution(events, measurement)
 
     render(conn,
       event_name: event_name,
       measurement: measurement,
-      histogram: histogram
+      histogram: histogram,
+      first_event_time: Metrics.first_event_time(events)
     )
   end
 
