@@ -78,16 +78,15 @@ defmodule Smoke.Metrics do
     |> Enum.sum()
   end
 
-  def last_value(events, key) do
-    get_measure = measurement_value(key)
-
-    events
-    |> Enum.map(get_measure)
-    |> Enum.reduce(nil, fn
-      event, acc when is_nil(event) -> acc
-      event, _acc -> event
-    end)
+  def last_value([{_time, measurement, _metadata} = _head | tail], key) do
+    if Map.has_key?(measurement, key) do
+      Map.get(measurement, key)
+    else
+      last_value(tail, key)
+    end
   end
+
+  def last_value(_events, _key), do: nil
 
   def statistics(events, key) do
     get_measure = measurement_value(key)
@@ -117,9 +116,11 @@ defmodule Smoke.Metrics do
     |> Statistics.hist()
   end
 
-  def first_event_time([{time, _measurement, _metadata} | _tail] = _events), do: time
-
   def first_event_time([]), do: nil
+
+  def first_event_time(events) do
+    events |> List.last() |> elem(0)
+  end
 
   defp measurement_value(key, default \\ nil) do
     fn {_time, measurement, _metadata} ->

@@ -103,7 +103,7 @@ defmodule Smoke.MetricsTest do
         create_event(%{other_value: 4})
       ]
 
-      assert events |> Metrics.last_value(:value) == 3
+      assert events |> Metrics.last_value(:value) == 1
     end
   end
 
