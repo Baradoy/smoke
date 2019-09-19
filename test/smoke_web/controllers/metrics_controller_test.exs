@@ -69,10 +69,34 @@ defmodule SmokeWeb.MetricsControllerTest do
     end
   end
 
+  describe "GET /events/:event_name/:measurement/:metric_name" do
+    test "Lists available precisions in html", %{conn: conn} do
+      conn = get(conn, "/events/smoke.example.done/latency/sum")
+      assert html_response(conn, 200) =~ "Metrics"
+      assert html_response(conn, 200) =~ "latency"
+      assert html_response(conn, 200) =~ "smoke.example.done"
+      assert html_response(conn, 200) =~ "hour"
+    end
+
+    test "Lists available precisions in JSON", %{conn: conn} do
+      conn =
+        conn
+        |> put_req_header("accept", "application/json")
+        |> get("/events/smoke.example.done/latency/sum")
+
+      assert json_response(conn, 200) == %{
+               "event_name" => "smoke.example.done",
+               "measurement" => "latency",
+               "metric_name" => "sum",
+               "precisions" => ["month", "day", "hour", "minute", "second"]
+             }
+    end
+  end
+
   describe "/events/:event_name/:measurement/counter" do
     test "counter in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/counter")
-      assert html_response(conn, 200) =~ "Counter"
+      conn = get(conn, "/events/smoke.example.done/latency/counter/hour")
+      assert html_response(conn, 200) =~ "counter"
       assert html_response(conn, 200) =~ "latency"
     end
 
@@ -80,23 +104,22 @@ defmodule SmokeWeb.MetricsControllerTest do
       conn =
         conn
         |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/counter")
+        |> get("/events/smoke.example.done/latency/counter/hour")
 
       assert %{
                "event_name" => "smoke.example.done",
-               "counter" => _,
                "measurement" => "latency",
-               "first_event_time" => first_event_time
+               "metric_name" => "counter",
+               "precision" => "hour",
+               "metrics" => [%{"metric" => _, "time" => _}]
              } = json_response(conn, 200)
-
-      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
   describe "/events/:event_name/:measurement/sum" do
     test "sum in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/sum")
-      assert html_response(conn, 200) =~ "Sum"
+      conn = get(conn, "/events/smoke.example.done/latency/sum/hour")
+      assert html_response(conn, 200) =~ "sum"
       assert html_response(conn, 200) =~ "latency"
     end
 
@@ -104,23 +127,22 @@ defmodule SmokeWeb.MetricsControllerTest do
       conn =
         conn
         |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/sum")
+        |> get("/events/smoke.example.done/latency/sum/hour")
 
       assert %{
                "event_name" => "smoke.example.done",
-               "sum" => _,
                "measurement" => "latency",
-               "first_event_time" => first_event_time
+               "metric_name" => "sum",
+               "precision" => "hour",
+               "metrics" => [%{"metric" => _, "time" => _}]
              } = json_response(conn, 200)
-
-      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
   describe "/events/:event_name/:measurement/last_value" do
     test "last_value in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/last_value")
-      assert html_response(conn, 200) =~ "Last Value"
+      conn = get(conn, "/events/smoke.example.done/latency/last_value/hour")
+      assert html_response(conn, 200) =~ "last_value"
       assert html_response(conn, 200) =~ "latency"
     end
 
@@ -128,23 +150,24 @@ defmodule SmokeWeb.MetricsControllerTest do
       conn =
         conn
         |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/last_value")
+        |> get("/events/smoke.example.done/latency/last_value/hour")
 
       assert %{
                "event_name" => "smoke.example.done",
-               "last_value" => _,
                "measurement" => "latency",
-               "first_event_time" => first_event_time
+               "metric_name" => "last_value",
+               "precision" => "hour",
+               "metrics" => [
+                 %{"metric" => _, "time" => _}
+               ]
              } = json_response(conn, 200)
-
-      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
   describe "/events/:event_name/:measurement/statistics" do
     test "statistics in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/statistics")
-      assert html_response(conn, 200) =~ "Statistics"
+      conn = get(conn, "/events/smoke.example.done/latency/statistics/hour")
+      assert html_response(conn, 200) =~ "statistics"
       assert html_response(conn, 200) =~ "latency"
     end
 
@@ -152,32 +175,36 @@ defmodule SmokeWeb.MetricsControllerTest do
       conn =
         conn
         |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/statistics")
+        |> get("/events/smoke.example.done/latency/statistics/hour")
 
       assert %{
                "event_name" => "smoke.example.done",
-               "statistics" => %{
-                 "max" => _,
-                 "mean" => _,
-                 "median" => _,
-                 "min" => _,
-                 "mode" => _,
-                 "p95" => _,
-                 "p99" => _,
-                 "variance" => _
-               },
                "measurement" => "latency",
-               "first_event_time" => first_event_time
+               "precision" => "hour",
+               "metric_name" => "statistics",
+               "metrics" => [
+                 %{
+                   "time" => _,
+                   "metric" => %{
+                     "max" => _,
+                     "mean" => _,
+                     "median" => _,
+                     "min" => _,
+                     "mode" => _,
+                     "p95" => _,
+                     "p99" => _,
+                     "variance" => _
+                   }
+                 }
+               ]
              } = json_response(conn, 200)
-
-      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 
   describe "/events/:event_name/:measurement/distribution" do
     test "distribution in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/distribution")
-      assert html_response(conn, 200) =~ "Distribution"
+      conn = get(conn, "/events/smoke.example.done/latency/distribution/hour")
+      assert html_response(conn, 200) =~ "distribution"
       assert html_response(conn, 200) =~ "latency"
     end
 
@@ -185,16 +212,17 @@ defmodule SmokeWeb.MetricsControllerTest do
       conn =
         conn
         |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/distribution")
+        |> get("/events/smoke.example.done/latency/distribution/hour")
 
       assert %{
                "event_name" => "smoke.example.done",
-               "histogram" => %{"292" => _},
                "measurement" => "latency",
-               "first_event_time" => first_event_time
+               "metric_name" => "distribution",
+               "precision" => "hour",
+               "metrics" => [
+                 %{"metric" => %{"292" => _}, "time" => _}
+               ]
              } = json_response(conn, 200)
-
-      assert {:ok, _, _} = DateTime.from_iso8601(first_event_time)
     end
   end
 

@@ -1,0 +1,3 @@
+<ul>
+    <li><%= @aggregate %></li>
+</ul>

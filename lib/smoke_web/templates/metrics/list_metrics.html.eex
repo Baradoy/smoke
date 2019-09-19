@@ -1,0 +1,13 @@
+<div class="jumbotron">
+  <h2>Metrics</h2>
+  
+  <h3><%= @event_name %></h3>
+  <h4><%= @measurement %></h4>
+  <ul>
+    <%= for metric <- @metrics do %>
+      <li>        
+        <%= link(metric, to: Routes.metrics_path(@conn, :list_precisions, @event_name, @measurement, metric), class: "btn") %>
+      </li>
+    <% end %> 
+  </ul>
+</div>

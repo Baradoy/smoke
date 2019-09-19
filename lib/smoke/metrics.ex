@@ -26,6 +26,9 @@ defmodule Smoke.Metrics do
     Stream.chunk_by(events, fn {time, _measurement, _metadata} ->
       truncate(time, precision)
     end)
+    |> Stream.map(fn [{time, _measurement, _metadata} | _tail] = events ->
+      %{time: truncate(time, precision), events: events}
+    end)
   end
 
   def truncate(date_time, :month), do: %{truncate(date_time, :day) | day: 1}
@@ -41,6 +44,12 @@ defmodule Smoke.Metrics do
         metadata |> Map.keys() |> Enum.into(acc)
     end)
     |> MapSet.to_list()
+  end
+
+  def apply_to_bucketed_events(bucketed_events, key, metrics_function) do
+    Stream.map(bucketed_events, fn %{time: time, events: events} ->
+      %{time: time, metric: metrics_function.(events, key)}
+    end)
   end
 
   def measurements(events) do
