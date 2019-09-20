@@ -3,6 +3,22 @@ defmodule SmokeWeb.MetricsControllerTest do
 
   @event_name [:smoke, :example, :done]
 
+  @metrics [
+    :counter,
+    :sum,
+    :last_value,
+    :statistics,
+    :distribution,
+    :max,
+    :mean,
+    :median,
+    :min,
+    :mode,
+    :p95,
+    :p99,
+    :variance
+  ]
+
   setup do
     fire_event()
   end
@@ -64,7 +80,21 @@ defmodule SmokeWeb.MetricsControllerTest do
       assert json_response(conn, 200) == %{
                "event_name" => "smoke.example.done",
                "measurement" => "latency",
-               "metrics" => ["counter", "sum", "last_value", "statistics", "distribution"]
+               "metrics" => [
+                 "counter",
+                 "sum",
+                 "last_value",
+                 "statistics",
+                 "distribution",
+                 "max",
+                 "mean",
+                 "median",
+                 "min",
+                 "mode",
+                 "p95",
+                 "p99",
+                 "variance"
+               ]
              }
     end
   end
@@ -93,84 +123,41 @@ defmodule SmokeWeb.MetricsControllerTest do
     end
   end
 
-  describe "/events/:event_name/:measurement/counter" do
-    test "counter in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/counter/hour")
-      assert html_response(conn, 200) =~ "counter"
-      assert html_response(conn, 200) =~ "latency"
+  describe "/events/:event_name/:measurement/:metric_name/:percision" do
+    test "metrics in JSON" do
+      @metrics
+      |> Enum.each(fn metric ->
+        metric_string = Atom.to_string(metric)
+
+        conn =
+          build_conn()
+          |> put_req_header("accept", "application/json")
+          |> get("/events/smoke.example.done/latency/#{metric_string}/hour")
+
+        assert %{
+                 "event_name" => "smoke.example.done",
+                 "measurement" => "latency",
+                 "metric_name" => ^metric_string,
+                 "precision" => "hour",
+                 "metrics" => [
+                   %{"metric" => _, "time" => _}
+                 ]
+               } = json_response(conn, 200)
+      end)
     end
 
-    test "counter in JSON", %{conn: conn} do
-      conn =
-        conn
-        |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/counter/hour")
-
-      assert %{
-               "event_name" => "smoke.example.done",
-               "measurement" => "latency",
-               "metric_name" => "counter",
-               "precision" => "hour",
-               "metrics" => [%{"metric" => _, "time" => _}]
-             } = json_response(conn, 200)
-    end
-  end
-
-  describe "/events/:event_name/:measurement/sum" do
-    test "sum in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/sum/hour")
-      assert html_response(conn, 200) =~ "sum"
-      assert html_response(conn, 200) =~ "latency"
-    end
-
-    test "sum in JSON", %{conn: conn} do
-      conn =
-        conn
-        |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/sum/hour")
-
-      assert %{
-               "event_name" => "smoke.example.done",
-               "measurement" => "latency",
-               "metric_name" => "sum",
-               "precision" => "hour",
-               "metrics" => [%{"metric" => _, "time" => _}]
-             } = json_response(conn, 200)
+    test "metrics in html" do
+      @metrics
+      |> Enum.each(fn metric ->
+        metric_string = Atom.to_string(metric)
+        conn = get(build_conn(), "/events/smoke.example.done/latency/#{metric_string}/hour")
+        assert html_response(conn, 200) =~ metric_string
+        assert html_response(conn, 200) =~ "latency"
+      end)
     end
   end
 
-  describe "/events/:event_name/:measurement/last_value" do
-    test "last_value in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/last_value/hour")
-      assert html_response(conn, 200) =~ "last_value"
-      assert html_response(conn, 200) =~ "latency"
-    end
-
-    test "last_value in JSON", %{conn: conn} do
-      conn =
-        conn
-        |> put_req_header("accept", "application/json")
-        |> get("/events/smoke.example.done/latency/last_value/hour")
-
-      assert %{
-               "event_name" => "smoke.example.done",
-               "measurement" => "latency",
-               "metric_name" => "last_value",
-               "precision" => "hour",
-               "metrics" => [
-                 %{"metric" => _, "time" => _}
-               ]
-             } = json_response(conn, 200)
-    end
-  end
-
-  describe "/events/:event_name/:measurement/statistics" do
-    test "statistics in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/statistics/hour")
-      assert html_response(conn, 200) =~ "statistics"
-      assert html_response(conn, 200) =~ "latency"
-    end
-
+  describe "/events/:event_name/:measurement/statistics/:percision" do
     test "statistics in JSON", %{conn: conn} do
       conn =
         conn
@@ -202,12 +189,6 @@ defmodule SmokeWeb.MetricsControllerTest do
   end
 
   describe "/events/:event_name/:measurement/distribution" do
-    test "distribution in html", %{conn: conn} do
-      conn = get(conn, "/events/smoke.example.done/latency/distribution/hour")
-      assert html_response(conn, 200) =~ "distribution"
-      assert html_response(conn, 200) =~ "latency"
-    end
-
     test "distribution in JSON", %{conn: conn} do
       conn =
         conn

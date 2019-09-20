@@ -125,6 +125,70 @@ defmodule Smoke.Metrics do
     |> Statistics.hist()
   end
 
+  def max(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.max()
+  end
+
+  def mean(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.mean()
+  end
+
+  def median(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.median()
+  end
+
+  def min(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.min()
+  end
+
+  def mode(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.mode()
+  end
+
+  def p95(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.percentile(95)
+  end
+
+  def p99(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.percentile(99)
+  end
+
+  def variance(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.variance()
+  end
+
   def first_event_time([]), do: nil
 
   def first_event_time(events) do
