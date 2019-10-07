@@ -5,7 +5,7 @@
   <ul>
     <%= for event_name <- @event_names do %>
       <li>
-        <%= link(event_name, to: Routes.metrics_path(@conn, :measurements, event_name), class: "btn") %>
+        <%= link(event_name, to: Routes.metrics_path(@conn, :list_measurements, event_name), class: "btn") %>
       </li>
     <% end %>
   </ul>

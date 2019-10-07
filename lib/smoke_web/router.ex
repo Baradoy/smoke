@@ -15,13 +15,10 @@ defmodule SmokeWeb.Router do
 
   scope "/", SmokeWeb do
     pipe_through(:browser)
-    get("/events/:event_name/:measurement/counter", MetricsController, :counter)
-    get("/events/:event_name/:measurement/sum", MetricsController, :sum)
-    get("/events/:event_name/:measurement/last_value", MetricsController, :last_value)
-    get("/events/:event_name/:measurement/statistics", MetricsController, :statistics)
-    get("/events/:event_name/:measurement/distribution", MetricsController, :distribution)
-    get("/events/:event_name/:measurement", MetricsController, :metrics)
-    get("/events/:event_name", MetricsController, :measurements)
-    get("/", MetricsController, :index)
+    get("/events/:event_name/:measurement/:metric_name/:precision", MetricsController, :metrics)
+    get("/events/:event_name/:measurement/:metric_name", MetricsController, :list_precisions)
+    get("/events/:event_name/:measurement", MetricsController, :list_metrics)
+    get("/events/:event_name", MetricsController, :list_measurements)
+    get("/", MetricsController, :list_events)
   end
 end

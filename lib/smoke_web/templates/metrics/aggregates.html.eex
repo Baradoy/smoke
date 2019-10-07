@@ -1,0 +1,5 @@
+<ul>
+    <%= for {key, value} <- @aggregates do %>
+        <li><%= key %>: <%= value %></li>
+    <% end %>
+</ul>

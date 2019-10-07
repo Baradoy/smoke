@@ -23,10 +23,7 @@ config :smoke, SmokeWeb.Endpoint,
 # Smoke Instrumentation
 config :smoke,
   instrument: [
-    [:shopify_api, :rest_request, :success],
-    [:shopify_api, :rest_request, :failure],
-    [:shopify_api, :throttling, :within_limit],
-    [:shopify_api, :throttling, :over_limit]
+    [:smoke, :example, :done]
   ],
   standalone_endpoint: true
 

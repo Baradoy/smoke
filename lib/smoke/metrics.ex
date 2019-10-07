@@ -26,6 +26,9 @@ defmodule Smoke.Metrics do
     Stream.chunk_by(events, fn {time, _measurement, _metadata} ->
       truncate(time, precision)
     end)
+    |> Stream.map(fn [{time, _measurement, _metadata} | _tail] = events ->
+      %{time: truncate(time, precision), events: events}
+    end)
   end
 
   def truncate(date_time, :month), do: %{truncate(date_time, :day) | day: 1}
@@ -41,6 +44,12 @@ defmodule Smoke.Metrics do
         metadata |> Map.keys() |> Enum.into(acc)
     end)
     |> MapSet.to_list()
+  end
+
+  def apply_to_bucketed_events(bucketed_events, key, metrics_function) do
+    Stream.map(bucketed_events, fn %{time: time, events: events} ->
+      %{time: time, metric: metrics_function.(events, key)}
+    end)
   end
 
   def measurements(events) do
@@ -78,16 +87,15 @@ defmodule Smoke.Metrics do
     |> Enum.sum()
   end
 
-  def last_value(events, key) do
-    get_measure = measurement_value(key)
-
-    events
-    |> Enum.map(get_measure)
-    |> Enum.reduce(nil, fn
-      event, acc when is_nil(event) -> acc
-      event, _acc -> event
-    end)
+  def last_value([{_time, measurement, _metadata} = _head | tail], key) do
+    if Map.has_key?(measurement, key) do
+      Map.get(measurement, key)
+    else
+      last_value(tail, key)
+    end
   end
+
+  def last_value(_events, _key), do: nil
 
   def statistics(events, key) do
     get_measure = measurement_value(key)
@@ -115,6 +123,76 @@ defmodule Smoke.Metrics do
     events
     |> Enum.map(get_measure)
     |> Statistics.hist()
+  end
+
+  def max(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.max()
+  end
+
+  def mean(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.mean()
+  end
+
+  def median(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.median()
+  end
+
+  def min(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.min()
+  end
+
+  def mode(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.mode()
+  end
+
+  def p95(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.percentile(95)
+  end
+
+  def p99(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.percentile(99)
+  end
+
+  def variance(events, key) do
+    get_measure = measurement_value(key)
+
+    events
+    |> Enum.map(get_measure)
+    |> Statistics.variance()
+  end
+
+  def first_event_time([]), do: nil
+
+  def first_event_time(events) do
+    events |> List.last() |> elem(0)
   end
 
   defp measurement_value(key, default \\ nil) do

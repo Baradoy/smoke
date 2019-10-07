@@ -1,13 +1,18 @@
 <div class="jumbotron">
-  <h2>Metrics</h2>
+  <h2><%= @metric_name %></h2>
   
-  <h3><%= @event_name %></h3>
-  <h4><%= @measurement %></h4>
+  <h3><%= @event_name %>.<%= @measurement %></h3>
+
+  <h4>Bucketed by <%= @precision %></h4>
+
   <ul>
-    <%= for metric <- @metrics do %>
-      <li>        
-        <%= link(metric, to: Routes.metrics_path(@conn, metric, @event_name, @measurement), class: "btn") %>
-      </li>
-    <% end %> 
+    <%= for %{time: time, metric: metric} <- @metrics do %>
+        <li><%= time %>
+        <%= case metric do 
+            %{} = aggregates -> render("aggregates.html", aggregates: aggregates)
+            aggregate -> render("aggregate.html", aggregate: aggregate)
+         end %>
+         </li>
+    <% end %>
   </ul>
 </div>

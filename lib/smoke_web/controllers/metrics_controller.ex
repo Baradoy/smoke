@@ -4,8 +4,23 @@ defmodule SmokeWeb.MetricsController do
   alias Smoke.Server
   alias Smoke.Metrics
 
-  def index(conn, _params) do
-    # events = Smoke.Server.get_events([:smoke, :example, :done])
+  @metrics [
+    :counter,
+    :sum,
+    :last_value,
+    :statistics,
+    :distribution,
+    :max,
+    :mean,
+    :median,
+    :min,
+    :mode,
+    :p95,
+    :p99,
+    :variance
+  ]
+
+  def list_events(conn, _params) do
     event_names =
       Smoke.Server.list_event_names()
       |> Enum.map(&path_to_strings/1)
@@ -13,7 +28,7 @@ defmodule SmokeWeb.MetricsController do
     render(conn, event_names: event_names)
   end
 
-  def measurements(conn, %{"event_name" => event_name}) do
+  def list_measurements(conn, %{"event_name" => event_name}) do
     measurements =
       event_name
       |> string_to_path()
@@ -24,95 +39,69 @@ defmodule SmokeWeb.MetricsController do
     render(conn, event_name: event_name, measurements: measurements)
   end
 
-  def metrics(conn, %{"event_name" => event_name, "measurement" => measurement}) do
-    metrics = [:counter, :sum, :last_value, :statistics, :distribution]
+  def list_metrics(conn, %{"event_name" => event_name, "measurement" => measurement}) do
+    render(conn,
+      event_name: event_name,
+      measurement: measurement,
+      metrics: @metrics
+    )
+  end
+
+  def list_precisions(conn, %{
+        "event_name" => event_name,
+        "measurement" => measurement,
+        "metric_name" => metric_name
+      }) do
+    precisions = [:month, :day, :hour, :minute, :second]
 
     render(conn,
       event_name: event_name,
       measurement: measurement,
+      metric_name: metric_name,
+      precisions: precisions
+    )
+  end
+
+  def metrics(conn, %{
+        "event_name" => event_name,
+        "measurement" => measurement,
+        "metric_name" => metric_name,
+        "precision" => precision
+      }) do
+    measurement = String.to_existing_atom(measurement)
+    precision = String.to_existing_atom(precision)
+    metric_func = metric_function_from_name(metric_name)
+
+    metrics =
+      event_name
+      |> string_to_path()
+      |> Server.get_events()
+      |> Metrics.time_bucket(precision)
+      |> Metrics.apply_to_bucketed_events(measurement, metric_func)
+      |> Enum.map(& &1)
+
+    render(conn,
+      metric_name: metric_name,
+      event_name: event_name,
+      measurement: measurement,
+      precision: precision,
       metrics: metrics
     )
   end
 
-  def counter(conn, %{"event_name" => event_name, "measurement" => measurement}) do
-    measurement = String.to_atom(measurement)
-
-    counter =
-      event_name
-      |> string_to_path()
-      |> Server.get_events()
-      |> Metrics.counter(measurement)
-
-    render(conn,
-      event_name: event_name,
-      measurement: measurement,
-      counter: counter
-    )
-  end
-
-  def sum(conn, %{"event_name" => event_name, "measurement" => measurement}) do
-    measurement = String.to_atom(measurement)
-
-    sum =
-      event_name
-      |> string_to_path()
-      |> Server.get_events()
-      |> Metrics.sum(measurement)
-
-    render(conn,
-      event_name: event_name,
-      measurement: measurement,
-      sum: sum
-    )
-  end
-
-  def last_value(conn, %{"event_name" => event_name, "measurement" => measurement}) do
-    measurement = String.to_atom(measurement)
-
-    last_value =
-      event_name
-      |> string_to_path()
-      |> Server.get_events()
-      |> Metrics.last_value(measurement)
-
-    render(conn,
-      event_name: event_name,
-      measurement: measurement,
-      last_value: last_value
-    )
-  end
-
-  def statistics(conn, %{"event_name" => event_name, "measurement" => measurement}) do
-    measurement = String.to_atom(measurement)
-
-    statistics =
-      event_name
-      |> string_to_path()
-      |> Server.get_events()
-      |> Metrics.statistics(measurement)
-
-    render(conn,
-      event_name: event_name,
-      measurement: measurement,
-      statistics: statistics
-    )
-  end
-
-  def distribution(conn, %{"event_name" => event_name, "measurement" => measurement}) do
-    measurement = String.to_atom(measurement)
-
-    histogram =
-      event_name
-      |> string_to_path()
-      |> Server.get_events()
-      |> Metrics.distribution(measurement)
-
-    render(conn,
-      event_name: event_name,
-      measurement: measurement,
-      histogram: histogram
-    )
-  end
+  defp metric_function_from_name("counter"), do: &Metrics.counter/2
+  defp metric_function_from_name("sum"), do: &Metrics.sum/2
+  defp metric_function_from_name("last_value"), do: &Metrics.last_value/2
+  defp metric_function_from_name("statistics"), do: &Metrics.statistics/2
+  defp metric_function_from_name("distribution"), do: &Metrics.distribution/2
+  defp metric_function_from_name("max"), do: &Metrics.max/2
+  defp metric_function_from_name("mean"), do: &Metrics.mean/2
+  defp metric_function_from_name("median"), do: &Metrics.median/2
+  defp metric_function_from_name("min"), do: &Metrics.min/2
+  defp metric_function_from_name("mode"), do: &Metrics.mode/2
+  defp metric_function_from_name("p95"), do: &Metrics.p95/2
+  defp metric_function_from_name("p99"), do: &Metrics.p99/2
+  defp metric_function_from_name("variance"), do: &Metrics.variance/2
 
   defp path_to_strings(path) do
     Enum.join(path, ".")

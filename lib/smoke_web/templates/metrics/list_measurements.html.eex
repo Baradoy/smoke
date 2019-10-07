@@ -7,7 +7,7 @@
   <ul>
     <%= for measurement <- @measurements do %>
       <li>
-        <%= link(measurement, to: Routes.metrics_path(@conn, :metrics, @event_name, measurement), class: "btn") %>
+        <%= link(measurement, to: Routes.metrics_path(@conn, :list_metrics, @event_name, measurement), class: "btn") %>
       </li>
     <% end %> 
   </ul>

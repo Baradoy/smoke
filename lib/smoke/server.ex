@@ -9,6 +9,7 @@ defmodule Smoke.Server do
   require Logger
 
   alias Smoke.Instrumenter
+  alias Smoke.EventAgent
 
   defmodule Config do
     @moduledoc """
@@ -47,58 +48,48 @@ defmodule Smoke.Server do
   def init(%{event_names: event_names, server_name: server_name}) do
     Enum.each(event_names, fn event_name -> attach(event_name, server_name) end)
 
-    events =
+    agents =
       Enum.into(event_names, %{}, fn
         {event_name, max_events, clawback} ->
-          {event_name, %{events: [], config: %Config{max_events: max_events, clawback: clawback}}}
+          {:ok, pid} = EventAgent.start_link(%Config{max_events: max_events, clawback: clawback})
+          {event_name, pid}
 
         event_name ->
-          {event_name, %{events: [], config: %Config{}}}
+          {:ok, pid} = EventAgent.start_link(%Config{})
+          {event_name, pid}
       end)
 
-    {:ok, %{events: events}}
+    {:ok, %{agents: agents}}
   end
 
   @impl true
-  def handle_call({:get_events, event_name}, _from, state) do
-    events = get_in(state, events_path(event_name))
+  def handle_call({:get_events, event_name}, _from, %{agents: agents} = state) do
+    events =
+      agents
+      |> Map.get(event_name)
+      |> EventAgent.get_events()
+
     {:reply, events, state}
   end
 
   def handle_call(:list_event_names, _from, state) do
-    event_names = state |> Map.fetch!(:events) |> Map.keys()
+    event_names = state |> Map.fetch!(:agents) |> Map.keys()
     {:reply, event_names, state}
   end
 
   @impl true
-  def handle_cast({:add_event, event_name, date_time, measurements, metadata}, state) do
-    new_state =
-      update_in(state, events_path(event_name), fn events_list ->
-        add_event({date_time, measurements, metadata}, events_list, config(event_name, state))
-      end)
+  def handle_cast(
+        {:add_event, event_name, date_time, measurements, metadata},
+        %{agents: agents} = state
+      ) do
+    agents
+    |> Map.get(event_name)
+    |> EventAgent.add_event({date_time, measurements, metadata})
 
-    {:noreply, new_state}
+    {:noreply, state}
   end
 
   # Private
-
-  defp add_event(event, events_list, %Config{max_events: max_events})
-       when length(events_list) < max_events do
-    [event | events_list]
-  end
-
-  defp add_event(event, events_list, %Config{clawback: clawback} = config) do
-    shortened_events_list = Enum.drop(events_list, -clawback)
-    add_event(event, shortened_events_list, config)
-  end
-
-  defp events_path(event_name) do
-    [:events, event_name, :events]
-  end
-
-  defp config(event_name, state) do
-    get_in(state, [:events, event_name, :config])
-  end
 
   defp attach({event_name, _, _}, server_name), do: attach(event_name, server_name)
 
